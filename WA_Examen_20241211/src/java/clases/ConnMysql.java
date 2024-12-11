@@ -24,7 +24,7 @@ public class ConnMysql {
     // Constructor
     public ConnMysql(){
  
- String url = "jdbc:mysql://localhost:3306/hlc_foro?autoReconnect=true&useSSL=false";
+ String url = "jdbc:mysql://localhost:3306/dgt?autoReconnect=true&useSSL=false";
  String driver = "com.mysql.jdbc.Driver";
  String usuario = "dwes"; // Accedemos con un usuario que ya tenemos creado con todos los permisos
  String password = "abc123.";

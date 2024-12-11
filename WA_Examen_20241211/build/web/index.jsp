@@ -5,19 +5,35 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+
+<%
+    if (session.getAttribute("login") != null) {
+        request.getRequestDispatcher("index.jsp").forward(request, response);
+    }
+%>
+
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <title>Examen - Index</title>
+        <style>
+            h1 {
+                text-align: center;
+            }
+        </style>
     </head>
     <body>
-        <h1>Login</h1>
+        <h1>Inicio de Sesión</h1>
 
-        <form action="s1" method="post">
-
-            <p>Usuario: <input type="text" id="user" name="user"></p>
-            <p>Contraseña: <input type="password" id="pwd" name="pwd"></p>
+        <form action="s1" method="POST">
+            
+            <label for="user">Usuario:</label><br>
+            <input type="text" id="user" name="user" placeholder="Ingresa tu usuario">
+            <br><br>
+            <label for="pass">Contraseña</label><br>
+            <input type="password" id="pass" name="pass" placeholder="Ingresa tu contraseña">
+            <br><br>
 
             <button type="submit">Iniciar sesión</button>
         </form>

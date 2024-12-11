@@ -13,14 +13,17 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  *
  * @author diurno
  */
-@WebServlet(name = "s1", urlPatterns = {"/s1"})
-public class s1 extends HttpServlet {
+@WebServlet(name = "s2", urlPatterns = {"/s2"})
+public class s2 extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -38,52 +41,44 @@ public class s1 extends HttpServlet {
             /* TODO output your page here. You may use following sample code. */
             
             HttpSession my_session = request.getSession();
-            
-            // Conseguimos el user
-            String user = request.getParameter("user");
-            String pass = request.getParameter("pass");
-            
-            try {
 
-                Connection conn = new ConnMysql().getConnection();
+            // Obtenemos el nombre (PK) del usuario logueado.
+            Object[] registro = (Object[]) my_session.getAttribute("auth");
+            String autor = (String) registro[0];
+                        
+            if (request.getParameter("logout") != null) {
+                my_session.removeAttribute("auth");
+                request.getRequestDispatcher("index.jsp").forward(request, response);
+            }
+            
+            if (request.getParameter("guardar") != null) {
+                int id_registro = Integer.parseInt(request.getParameter("guardar"));
+                String mensaje = request.getParameter("mensaje");
 
-                Statement instruccion = conn.createStatement(
-                        ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                
-                String sql = "SELECT * from usuario WHERE dni = '" + user 
-                        + "' AND pass = '" + pass + "'";
-                
-                ResultSet rs = instruccion.executeQuery(sql);
-                
-                if (rs.next()) {
-                    Object[] registro = new Object[5];
-                    registro[0] = rs.getString("dni"); //DNI
-                    registro[1] = rs.getString("nombre"); // Nombre
-                    registro[2] = rs.getInt("puntos"); // Puntos
-                    registro[3] = rs.getInt("admin"); // Admin (1/0)
-                    registro[4] = rs.getString("pass"); // Pass
+                try {
                     
-                   
-                    // Habrá que ver si el registro de admin es 1 o 0 para redirigir
-                    my_session.setAttribute("auth", registro[3]);
+                    Connection conn = new ConnMysql().getConnection();
                     
-                    if ((int) registro[3] == 1) { // Si es admin
-                        request.getRequestDispatcher("admin.jsp").forward(request, response);
-                    } else { // Si no lo es
-                        request.getRequestDispatcher("conductor.jsp").forward(request, response);
+                    Statement instruccion = conn.createStatement(
+                            ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                    
+                    String sql = "SELECT * FROM coche WHERE propietario = " + id_registro;
+                    ResultSet rs = instruccion.executeQuery(sql);
+                    if (rs.next()) {
+                        rs.updateString("contenido", mensaje);
+                        rs.updateRow();
                     }
                     
+                    rs.close();
+                    instruccion.close();
+                    conn.close();
                     
+                    request.getRequestDispatcher("admin.jsp").forward(request, response);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+ 
                 }
-                
-                rs.close();
-                instruccion.close();
-                conn.close();
-                
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
-            out.println("Hola S1");
             
         }
     }
